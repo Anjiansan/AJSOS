@@ -1,4 +1,4 @@
-TOOLS_PATH	:= /home/anjiansan/Document/OS/EasyOS/z_tools/
+TOOLS_PATH	:= /home/anjiansan/Document/OS/AJSOS/z_tools/
 INCPATH		:= $(TOOLS_PATH)haribote/
 
 CC1 		:= wine $(TOOLS_PATH)cc1.exe -I $(INCPATH) -Os -Wall -quiet
