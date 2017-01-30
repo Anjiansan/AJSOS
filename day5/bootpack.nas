@@ -26,6 +26,7 @@ _HariMain:
 	PUSH	EBX
 	LEA	EBX,DWORD [-316+EBP]
 	SUB	ESP,304
+	CALL	_init_gdtidt
 	CALL	_init_palette
 	MOVSX	EAX,WORD [4086]
 	PUSH	EAX
