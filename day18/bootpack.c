@@ -1,5 +1,14 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <string.h>
 #include "bootpack.h"
+
+struct FILEINFO
+{
+    unsigned char name[8],ext[3],type;
+    char reserve[10];
+    unsigned short time,data,clustno;
+    unsigned int size;
+};
 
 void make_window8(unsigned char *buf,int xsize,int ysize,char *title,char act);
 void putfont8_asc_sht(struct SHEET *sht,int x,int y,int c,int b,char *s,int l);
@@ -463,9 +472,10 @@ void console_task(struct SHEET *sheet,unsigned int memtotal)
 {
     struct TIMER *timer;
     struct TASK *task=task_now();
-    int i,fifobuf[128],cursor_x=16,cursor_y=28,cursor_c=-1;
+    int i,fifobuf[128],cursor_x=16,cursor_y=28,cursor_c=-1,x,y;
     char s[30],cmdline[30];
     struct MEMMAN *memman=(struct MEMMAN *)MEMMAN_ADDR;
+    struct FILEINFO *finfo=(struct FILEINFO *)(ADR_DISKIMG+0x2600);
 
     fifo32_init(&task->fifo,128,fifobuf,task);
     timer=timer_alloc();
@@ -531,7 +541,7 @@ void console_task(struct SHEET *sheet,unsigned int memtotal)
                     putfont8_asc_sht(sheet,cursor_x,cursor_y,COL8_FFFFFF,COL8_000000," ",1);    //用空格将光标擦除
                     cmdline[cursor_x/8-2]=0;
                     cursor_y=cons_newline(cursor_y,sheet);
-                    if(cmdline[0]=='f' && cmdline[1]=='r' && cmdline[2]=='e' && cmdline[3]=='e')
+                    if(strcmp(cmdline,"free")==0)
                     {   //free命令
                         sprintf(s,"total %dMB",memtotal/(1024*1024));
                         putfont8_asc_sht(sheet,8,cursor_y,COL8_FFFFFF,COL8_000000,s,30);
@@ -539,6 +549,45 @@ void console_task(struct SHEET *sheet,unsigned int memtotal)
                         sprintf(s,"free %dKB",memman_total(memman)/1024);
                         putfont8_asc_sht(sheet,8,cursor_y,COL8_FFFFFF,COL8_000000,s,30);
                         cursor_y=cons_newline(cursor_y,sheet);
+                        cursor_y=cons_newline(cursor_y,sheet);
+                    }
+                    else if(strcmp(cmdline,"cls")==0)
+                    {   //cls命令
+                        for(y=28;y<28+128;y++)
+                        {
+                            for(x=8;x<8+240;x++)
+                            {
+                                sheet->buf[x+y*sheet->bxsize]=COL8_000000;
+                            }
+                        }
+                        sheet_refresh(sheet,8,28,8+240,28+128);
+                        cursor_y=28;
+                    }
+                    else if(strcmp(cmdline,"ls")==0)
+                    {
+                        for(x=0;x<240;x++)
+                        {
+                            if(finfo[x].name[0]==0x00)
+                            {
+                                break;
+                            }
+                            if(finfo[x].name[0]!=0xE5)
+                            {
+                                if((finfo[x].type & 0x18)==0)
+                                {
+                                    sprintf(s,"filename.ext %7d",finfo[x].size);
+                                    for(y=0;y<8;y++)
+                                    {
+                                        s[y]=finfo[x].name[y];
+                                    }
+                                    s[9]=finfo[x].ext[0];
+                                    s[10]=finfo[x].ext[1];
+                                    s[11]=finfo[x].ext[2];
+                                    putfont8_asc_sht(sheet,8,cursor_y,COL8_FFFFFF,COL8_000000,s,30);
+                                    cursor_y=cons_newline(cursor_y,sheet);
+                                }
+                            }
+                        }
                         cursor_y=cons_newline(cursor_y,sheet);
                     }
                     else if(cmdline[0]!=0)  //不是命令,也不是空行

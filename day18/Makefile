@@ -55,6 +55,7 @@ copy:
 	mount -o loop AJSOS.img /tmp/floppy
 	sleep 1
 	cp AJSOS.sys /tmp/floppy
+	cp ipl.nas /tmp/floppy
 	sleep 1
 	umount /tmp/floppy
 	rmdir /tmp/floppy
