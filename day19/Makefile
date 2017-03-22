@@ -1,5 +1,6 @@
 OBJS_BOOTPACK=bootpack.obj naskfunc.obj hankaku.obj graphic.obj dsctbl.obj int.obj \
-			  fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj timer.obj mtask.obj
+			  fifo.obj keyboard.obj mouse.obj memory.obj sheet.obj timer.obj mtask.obj \
+			  window.obj console.obj file.obj
 
 TOOLS_PATH	:= /home/anjiansan/Document/OS/AJSOS/z_tools/
 INCPATH		:= $(TOOLS_PATH)haribote/
@@ -57,6 +58,7 @@ copy:
 	cp AJSOS.sys /tmp/floppy
 	cp ipl.nas /tmp/floppy
 	cp Makefile /tmp/floppy
+	cp hlt.ajs /tmp/floppy
 	sleep 1
 	umount /tmp/floppy
 	rmdir /tmp/floppy
